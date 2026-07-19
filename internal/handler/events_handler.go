@@ -8,14 +8,26 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-type EventsHandler struct {
-	service *service.EventService
+type EventProcessor interface {
+	Enqueue(id uuid.UUID)
 }
 
-func NewEventsHandler(service *service.EventService) *EventsHandler {
-	return &EventsHandler{service: service}
+type EventsHandler struct {
+	service   *service.EventService
+	processor EventProcessor
+}
+
+func NewEventsHandler(
+	service *service.EventService,
+	processor EventProcessor,
+) *EventsHandler {
+	return &EventsHandler{
+		service:   service,
+		processor: processor,
+	}
 }
 
 func (h *EventsHandler) Create(ctx *gin.Context) {
@@ -51,6 +63,8 @@ func (h *EventsHandler) Create(ctx *gin.Context) {
 
 		return
 	}
+
+	h.processor.Enqueue(event.ID)
 
 	ctx.JSON(http.StatusCreated, event)
 }

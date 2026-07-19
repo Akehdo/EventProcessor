@@ -3,6 +3,7 @@ package repository
 import (
 	"EventProcessor/internal/domain"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -42,4 +43,21 @@ func (r *EventRepository) List() ([]domain.Event, error) {
 	}
 
 	return events, nil
+}
+
+func (r *EventRepository) UpdateStatus(id uuid.UUID, status domain.Status) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	event, exists := r.events[id]
+	if !exists {
+		return domain.ErrEventNotFound
+	}
+
+	event.Status = status
+	event.UpdatedAt = time.Now()
+	
+	r.events[id] = event
+
+	return nil
 }

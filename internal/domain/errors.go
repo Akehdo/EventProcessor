@@ -7,4 +7,5 @@ var (
 	ErrPayloadRequired    = errors.New("payload is required")
 	ErrPayloadInvalid     = errors.New("payload must be valid JSON")
 	ErrPayloadNull        = errors.New("payload cannot be null")
+	ErrEventNotFound      = errors.New("event not found")
 )

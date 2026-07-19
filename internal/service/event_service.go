@@ -11,6 +11,7 @@ import (
 type EventRepository interface {
 	Save(event domain.Event) error
 	List() ([]domain.Event, error)
+	UpdateStatus(id uuid.UUID, status domain.Status) error
 }
 
 type EventService struct {
@@ -55,4 +56,26 @@ func (s *EventService) Create(
 
 func (s *EventService) List() ([]domain.Event, error) {
 	return s.repo.List()
+}
+
+func (s *EventService) Process(id uuid.UUID) error {
+	if err := s.repo.UpdateStatus(
+		id,
+		domain.StatusProcessing,
+	); err != nil {
+
+		return err
+	}
+
+	//imitation of processing
+	time.Sleep(3 * time.Second)
+
+	if err := s.repo.UpdateStatus(
+		id,
+		domain.StatusCompleted,
+	); err != nil {
+		return err
+	}
+
+	return nil
 }

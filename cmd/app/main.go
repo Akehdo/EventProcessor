@@ -2,6 +2,7 @@ package main
 
 import (
 	"EventProcessor/internal/handler"
+	"EventProcessor/internal/processor"
 	"EventProcessor/internal/repository"
 	"EventProcessor/internal/service"
 	"log"
@@ -12,7 +13,12 @@ import (
 func main() {
 	eventRepository := repository.NewEventRepository()
 	eventService := service.NewEventService(eventRepository)
-	eventsHandler := handler.NewEventsHandler(eventService)
+
+	eventProcessor := processor.NewEventProcessor(eventService, 100)
+	eventProcessor.Start(3)
+	defer eventProcessor.Stop()
+	
+	eventsHandler := handler.NewEventsHandler(eventService, eventProcessor)
 
 	router := gin.Default()
 
